@@ -1,0 +1,8 @@
+.DS_module
+. .idea/
+. .vscode/
+/vendor/
+/bin/
+/. .env
+. god. tmp. .log
+. /*.tmp

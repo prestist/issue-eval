@@ -1,0 +1,55 @@
+name: 'issue-eval'
+description: 'AI-powered GitHub issue-eval that generates helpful follow-up questions'
+author: 'prestist'
+
+branding:
+  icon: 'message-circle'
+  color: 'blue'
+
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+  google-ai-api-key:
+    description: 'Google AI API key for Gemini/Gemma'
+    required: true
+  issue-number:
+    description: 'Issue number to process'
+    required: true
+  repo-owner:
+    description: 'Repository owner'
+    required: true
+  repo-name:
+    description: 'Repository name'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+        
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-issue-assistant-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-issue-assistant-
+          
+    - name: Download dependencies
+      shell: bash
+      run: go mod download
+      
+    - name: Run issue-eval
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        GOOGLE_AI_API_KEY: ${{ inputs.google-ai-api-key }}
+        REPO_OWNER: ${{ inputs.repo-owner }}
+        REPO_NAME: ${{ inputs.repo-name }}
+      run: go run main.go ${{ inputs.issue-number }} 
